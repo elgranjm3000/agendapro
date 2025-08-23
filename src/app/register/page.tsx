@@ -1,5 +1,22 @@
-import React, { useState } from 'react';
-import { Eye, EyeOff, Calendar, CheckCircle, ArrowRight, User, Mail, Building2, Phone } from 'lucide-react';
+'use client'
+
+import React, { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { 
+  Eye, 
+  EyeOff, 
+  Calendar, 
+  CheckCircle, 
+  ArrowRight, 
+  User, 
+  Mail, 
+  Building2, 
+  Phone,
+  Sparkles,
+  Star,
+  TrendingUp
+} from 'lucide-react'
 
 export default function ModernRegister() {
   const [formData, setFormData] = useState({
@@ -10,333 +27,542 @@ export default function ModernRegister() {
     businessName: '',
     phone: '',
     acceptTerms: false,
-  });
-  const [showPassword, setShowPassword] = useState(false);
-  const [step, setStep] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
+  })
+  const [showPassword, setShowPassword] = useState(false)
+  const [step, setStep] = useState(1)
+  const [isLoading, setIsLoading] = useState(false)
+  const [errors, setErrors] = useState<{[key: string]: string}>({})
+  const router = useRouter()
 
-  const handleSubmit = () => {
+  useEffect(() => {
+    // Animaciones de entrada
+    const elements = document.querySelectorAll('.animate-on-load')
+    elements.forEach((element, index) => {
+      setTimeout(() => {
+        element.classList.add('animate-in')
+      }, index * 100)
+    })
+  }, [])
+
+  const validateStep1 = () => {
+    const newErrors: {[key: string]: string} = {}
+    
+    if (!formData.name) newErrors.name = 'El nombre es requerido'
+    if (!formData.email) {
+      newErrors.email = 'El email es requerido'
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Formato de email inválido'
+    }
+    if (!formData.password) {
+      newErrors.password = 'La contraseña es requerida'
+    } else if (formData.password.length < 6) {
+      newErrors.password = 'La contraseña debe tener al menos 6 caracteres'
+    }
     if (formData.password !== formData.confirmPassword) {
-      alert('Las contraseñas no coinciden');
-      return;
+      newErrors.confirmPassword = 'Las contraseñas no coinciden'
     }
     
-    if (!formData.acceptTerms) {
-      alert('Debes aceptar los términos y condiciones');
-      return;
-    }
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
 
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      alert('¡Cuenta creada exitosamente!');
-    }, 2000);
-  };
+  const validateStep2 = () => {
+    const newErrors: {[key: string]: string} = {}
+    
+    if (!formData.acceptTerms) {
+      newErrors.acceptTerms = 'Debes aceptar los términos y condiciones'
+    }
+    
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const handleSubmit = async () => {
+    if (!validateStep2()) return
+    
+    setIsLoading(true)
+    
+    try {
+      // Simular llamada a API
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      
+      // Aquí iría la lógica real usando tu ruta /api/auth/register
+      // const response = await fetch('/api/auth/register', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify(formData)
+      // })
+      
+      // Por ahora, simular registro exitoso
+      router.push('/dashboard')
+      
+    } catch (error) {
+      console.error('Error en registro:', error)
+      setErrors({ general: 'Error al crear la cuenta. Intenta nuevamente.' })
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const nextStep = () => {
-    if (step === 1 && (!formData.name || !formData.email)) {
-      alert('Por favor completa todos los campos requeridos');
-      return;
+    if (step === 1 && validateStep1()) {
+      setStep(2)
     }
-    setStep(step + 1);
-  };
+  }
 
   const prevStep = () => {
-    setStep(step - 1);
-  };
+    setStep(1)
+    setErrors({})
+  }
+
+  const handleInputChange = (field: string, value: string | boolean) => {
+    setFormData(prev => ({ ...prev, [field]: value }))
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }))
+    }
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex">
-      {/* Left Panel - Features */}
-      <div className="hidden lg:flex lg:flex-1 flex-col justify-center px-12 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-transparent"></div>
-        <div className="relative z-10">
-          <div className="flex items-center space-x-3 mb-12">
-            <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
-              <Calendar className="h-7 w-7 text-white" />
-            </div>
-            <h1 className="text-3xl font-bold text-white">
-              Agenda<span className="text-purple-400">Pro</span>
-            </h1>
+    <>
+      <div className="min-vh-100 d-flex" style={{
+        background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #f1f5f9 100%)'
+      }}>
+        {/* Left Panel - Features */}
+        <div className="d-none d-lg-flex col-lg-7 col-xl-8 align-items-center justify-content-center position-relative overflow-hidden">
+          {/* Background Elements */}
+          <div className="position-absolute w-100 h-100">
+            <div className="position-absolute rounded-circle opacity-25 pulse-soft" 
+                 style={{
+                   top: '15%', 
+                   left: '20%', 
+                   width: '200px', 
+                   height: '200px', 
+                   background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+                   filter: 'blur(40px)'
+                 }}></div>
+            <div className="position-absolute rounded-circle opacity-25 pulse-soft" 
+                 style={{
+                   top: '40%', 
+                   right: '20%', 
+                   width: '280px', 
+                   height: '280px', 
+                   background: 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)',
+                   filter: 'blur(40px)',
+                   animationDelay: '1s'
+                 }}></div>
+            <div className="position-absolute rounded-circle opacity-25 pulse-soft" 
+                 style={{
+                   bottom: '15%', 
+                   left: '15%', 
+                   width: '220px', 
+                   height: '220px', 
+                   background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+                   filter: 'blur(40px)',
+                   animationDelay: '2s'
+                 }}></div>
           </div>
-          
-          <div className="space-y-8 max-w-md">
-            <div>
-              <h2 className="text-4xl font-bold text-white mb-4">
-                Comienza tu transformación digital
+
+          <div className="position-relative z-1 px-5" style={{maxWidth: '550px'}}>
+            {/* Logo */}
+            <div className="animate-on-load opacity-0 mb-5" style={{transform: 'translateY(30px)'}}>
+              <div className="d-flex align-items-center mb-5">
+                <div className="d-flex align-items-center justify-content-center rounded-3 me-3 shadow-soft" 
+                     style={{
+                       width: '50px', 
+                       height: '50px',
+                       background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)'
+                     }}>
+                  <Calendar size={24} className="text-white" />
+                </div>
+                <h1 className="fs-2 fw-bold mb-0">
+                  Agenda<span style={{
+                    background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent'
+                  }}>Pro</span>
+                </h1>
+              </div>
+            </div>
+            
+            {/* Main Content */}
+            <div className="animate-on-load opacity-0" style={{transform: 'translateY(30px)', animationDelay: '0.2s'}}>
+              <h2 className="display-5 fw-bold text-dark mb-4 lh-1">
+                Comienza tu transformación{' '}
+                <span style={{
+                  background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent'
+                }}>digital</span>
               </h2>
-              <p className="text-purple-200 text-lg leading-relaxed">
+              <p className="fs-5 text-muted mb-5 lh-base">
                 Únete a miles de profesionales que ya optimizaron su gestión con nuestra plataforma.
               </p>
             </div>
             
-            <div className="space-y-4">
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                  <CheckCircle className="h-5 w-5 text-white" />
+            {/* Benefits */}
+            <div className="animate-on-load opacity-0" style={{transform: 'translateY(30px)', animationDelay: '0.4s'}}>
+              <div className="row g-3 mb-5">
+                <div className="col-12">
+                  <div className="d-flex align-items-center p-4 bg-glass rounded-3 border-soft">
+                    <div className="bg-success d-flex align-items-center justify-content-center rounded-2 me-3" 
+                         style={{width: '45px', height: '45px'}}>
+                      <CheckCircle size={22} className="text-white" />
+                    </div>
+                    <div>
+                      <div className="fw-bold text-dark">Configuración en 5 minutos</div>
+                      <div className="text-muted">Sin complicaciones técnicas</div>
+                    </div>
+                  </div>
                 </div>
-                <div className="text-white">
-                  <div className="font-semibold">Configuración en 5 minutos</div>
-                  <div className="text-purple-200 text-sm">Sin complicaciones técnicas</div>
+                
+                <div className="col-12">
+                  <div className="d-flex align-items-center p-4 bg-glass rounded-3 border-soft">
+                    <div className="d-flex align-items-center justify-content-center rounded-2 me-3" 
+                         style={{
+                           width: '45px', 
+                           height: '45px',
+                           background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)'
+                         }}>
+                      <Star size={22} className="text-white" />
+                    </div>
+                    <div>
+                      <div className="fw-bold text-dark">14 días gratis</div>
+                      <div className="text-muted">Sin tarjeta de crédito</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="col-12">
+                  <div className="d-flex align-items-center p-4 bg-glass rounded-3 border-soft">
+                    <div className="d-flex align-items-center justify-content-center rounded-2 me-3" 
+                         style={{
+                           width: '45px', 
+                           height: '45px',
+                           background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)'
+                         }}>
+                      <Sparkles size={22} className="text-white" />
+                    </div>
+                    <div>
+                      <div className="fw-bold text-dark">Soporte 24/7</div>
+                      <div className="text-muted">Te ayudamos en cada paso</div>
+                    </div>
+                  </div>
                 </div>
               </div>
               
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                  <CheckCircle className="h-5 w-5 text-white" />
+              {/* Stats */}
+              <div className="bg-glass rounded-3 p-4 border-soft">
+                <div className="fs-3 fw-bold text-dark mb-2">
+                  +40% de ingresos promedio
                 </div>
-                <div className="text-white">
-                  <div className="font-semibold">14 días gratis</div>
-                  <div className="text-purple-200 text-sm">Sin tarjeta de crédito</div>
+                <div className="text-muted">
+                  reportado por nuestros usuarios después del primer mes
                 </div>
-              </div>
-              
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
-                  <CheckCircle className="h-5 w-5 text-white" />
-                </div>
-                <div className="text-white">
-                  <div className="font-semibold">Soporte 24/7</div>
-                  <div className="text-purple-200 text-sm">Te ayudamos en cada paso</div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl p-6">
-              <div className="text-2xl font-bold text-white mb-2">
-                +40% de ingresos promedio
-              </div>
-              <div className="text-purple-200 text-sm">
-                reportado por nuestros usuarios después del primer mes
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Right Panel - Register Form */}
-      <div className="flex-1 lg:flex-none lg:w-96 xl:w-[32rem] bg-white flex flex-col justify-center px-6 lg:px-8">
-        <div className="w-full max-w-md mx-auto space-y-8">
+        {/* Right Panel - Register Form */}
+        <div className="col-12 col-lg-5 col-xl-4 bg-white d-flex align-items-center justify-content-center min-vh-100 position-relative">
           {/* Mobile Logo */}
-          <div className="lg:hidden flex items-center justify-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-              <Calendar className="h-5 w-5 text-white" />
+          <div className="d-lg-none position-absolute top-0 start-0 w-100 text-center pt-4">
+            <div className="d-flex align-items-center justify-content-center">
+              <div className="d-flex align-items-center justify-content-center rounded-2 me-2" 
+                   style={{
+                     width: '32px', 
+                     height: '32px',
+                     background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)'
+                   }}>
+                <Calendar size={16} className="text-white" />
+              </div>
+              <span className="fw-bold fs-5">
+                Agenda<span style={{
+                  background: 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent'
+                }}>Pro</span>
+              </span>
             </div>
-            <span className="text-xl font-bold text-gray-900">
-              Agenda<span className="text-purple-600">Pro</span>
-            </span>
           </div>
 
-          {/* Progress Indicator */}
-          <div className="flex items-center justify-center space-x-2">
-            <div className={`w-3 h-3 rounded-full transition-colors ${step >= 1 ? 'bg-purple-600' : 'bg-gray-300'}`}></div>
-            <div className={`w-8 h-1 rounded-full transition-colors ${step >= 2 ? 'bg-purple-600' : 'bg-gray-300'}`}></div>
-            <div className={`w-3 h-3 rounded-full transition-colors ${step >= 2 ? 'bg-purple-600' : 'bg-gray-300'}`}></div>
-          </div>
-
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-900">
-              {step === 1 ? 'Crea tu cuenta' : 'Información de tu negocio'}
-            </h2>
-            <p className="mt-2 text-sm text-gray-600">
-              {step === 1 
-                ? 'Comienza tu prueba gratuita de 14 días'
-                : 'Personaliza tu experiencia (opcional)'
-              }
-            </p>
-          </div>
-
-          {step === 1 && (
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <User className="h-4 w-4 inline mr-1" />
-                  Nombre completo *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-                  placeholder="Tu nombre completo"
-                />
+          <div className="w-100 px-4 px-lg-5" style={{maxWidth: '420px'}}>
+            {/* Progress Indicator */}
+            <div className="d-flex justify-content-center mb-4">
+              <div className="d-flex align-items-center">
+                <div className={`rounded-circle ${step >= 1 ? 'bg-primary' : 'bg-light'} me-2`} 
+                     style={{width: '12px', height: '12px'}}></div>
+                <div className={`${step >= 2 ? 'bg-primary' : 'bg-light'} me-2`} 
+                     style={{width: '32px', height: '4px', borderRadius: '2px'}}></div>
+                <div className={`rounded-circle ${step >= 2 ? 'bg-primary' : 'bg-light'}`} 
+                     style={{width: '12px', height: '12px'}}></div>
               </div>
+            </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <Mail className="h-4 w-4 inline mr-1" />
-                  Email *
-                </label>
-                <input
-                  type="email"
-                  required
-                  value={formData.email}
-                  onChange={(e) => setFormData({...formData, email: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-                  placeholder="tu@email.com"
-                />
+            {/* Header */}
+            <div className="animate-on-load opacity-0 text-center mb-4" style={{transform: 'translateY(20px)'}}>
+              <h2 className="display-6 fw-bold text-dark mb-2">
+                {step === 1 ? 'Crea tu cuenta' : 'Información de tu negocio'}
+              </h2>
+              <p className="text-muted">
+                {step === 1 
+                  ? 'Comienza tu prueba gratuita de 14 días'
+                  : 'Personaliza tu experiencia (opcional)'
+                }
+              </p>
+            </div>
+
+            {errors.general && (
+              <div className="alert alert-danger mb-4">
+                {errors.general}
               </div>
+            )}
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Contraseña *
-                </label>
-                <div className="relative">
+            {step === 1 && (
+              <div className="animate-on-load opacity-0" style={{transform: 'translateY(20px)', animationDelay: '0.1s'}}>
+                <div className="mb-3">
+                  <label className="form-label fw-semibold d-flex align-items-center">
+                    <User size={16} className="me-2" />
+                    Nombre completo *
+                  </label>
                   <input
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    value={formData.password}
-                    onChange={(e) => setFormData({...formData, password: e.target.value})}
-                    className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-                    placeholder="Mínimo 6 caracteres"
+                    type="text"
+                    className={`form-control form-control-lg ${errors.name ? 'is-invalid' : ''}`}
+                    value={formData.name}
+                    onChange={(e) => handleInputChange('name', e.target.value)}
+                    placeholder="Tu nombre completo"
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600"
-                  >
-                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                  </button>
+                  {errors.name && <div className="invalid-feedback">{errors.name}</div>}
                 </div>
-                {formData.password && formData.password.length < 6 && (
-                  <p className="text-xs text-red-500 mt-1">La contraseña debe tener al menos 6 caracteres</p>
-                )}
-              </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Confirmar contraseña *
-                </label>
-                <input
-                  type="password"
-                  required
-                  value={formData.confirmPassword}
-                  onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-                  placeholder="Repite tu contraseña"
-                />
-                {formData.confirmPassword && formData.password !== formData.confirmPassword && (
-                  <p className="text-xs text-red-500 mt-1">Las contraseñas no coinciden</p>
-                )}
-              </div>
-
-              <button
-                onClick={nextStep}
-                className="w-full bg-gradient-to-r from-purple-600 to-purple-700 text-white py-3 px-4 rounded-xl hover:from-purple-700 hover:to-purple-800 font-medium flex items-center justify-center space-x-2 transition-all duration-200 transform hover:scale-105 shadow-lg"
-              >
-                <span>Continuar</span>
-                <ArrowRight className="h-4 w-4" />
-              </button>
-            </div>
-          )}
-
-          {step === 2 && (
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <Building2 className="h-4 w-4 inline mr-1" />
-                  Nombre de tu negocio
-                </label>
-                <input
-                  type="text"
-                  value={formData.businessName}
-                  onChange={(e) => setFormData({...formData, businessName: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-                  placeholder="Ej: Salón María, Dr. García, etc."
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <Phone className="h-4 w-4 inline mr-1" />
-                  Teléfono
-                </label>
-                <input
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
-                  placeholder="+56 9 1234 5678"
-                />
-              </div>
-
-              <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-xl p-4">
-                <h4 className="font-medium text-blue-900 mb-2">¿Qué incluye tu prueba gratuita?</h4>
-                <div className="space-y-2 text-sm text-blue-800">
-                  <div className="flex items-center">
-                    <CheckCircle className="h-4 w-4 mr-2 flex-shrink-0 text-green-600" />
-                    14 días completamente gratis
-                  </div>
-                  <div className="flex items-center">
-                    <CheckCircle className="h-4 w-4 mr-2 flex-shrink-0 text-green-600" />
-                    Todas las funciones incluidas
-                  </div>
-                  <div className="flex items-center">
-                    <CheckCircle className="h-4 w-4 mr-2 flex-shrink-0 text-green-600" />
-                    Sin tarjeta de crédito requerida
-                  </div>
-                  <div className="flex items-center">
-                    <CheckCircle className="h-4 w-4 mr-2 flex-shrink-0 text-green-600" />
-                    Soporte personalizado
-                  </div>
+                <div className="mb-3">
+                  <label className="form-label fw-semibold d-flex align-items-center">
+                    <Mail size={16} className="me-2" />
+                    Email *
+                  </label>
+                  <input
+                    type="email"
+                    className={`form-control form-control-lg ${errors.email ? 'is-invalid' : ''}`}
+                    value={formData.email}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
+                    placeholder="tu@email.com"
+                  />
+                  {errors.email && <div className="invalid-feedback">{errors.email}</div>}
                 </div>
-              </div>
 
-              <div className="flex items-start">
-                <input
-                  id="acceptTerms"
-                  name="acceptTerms"
-                  type="checkbox"
-                  checked={formData.acceptTerms}
-                  onChange={(e) => setFormData({...formData, acceptTerms: e.target.checked})}
-                  className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded mt-1"
-                />
-                <label htmlFor="acceptTerms" className="ml-2 block text-sm text-gray-700">
-                  Acepto los{' '}
-                  <button className="text-purple-600 hover:text-purple-500 font-medium">
-                    términos y condiciones
-                  </button>{' '}
-                  y la{' '}
-                  <button className="text-purple-600 hover:text-purple-500 font-medium">
-                    política de privacidad
-                  </button>
-                </label>
-              </div>
-
-              <div className="flex space-x-3">
-                <button
-                  onClick={prevStep}
-                  className="flex-1 border border-gray-300 text-gray-700 py-3 px-4 rounded-xl hover:border-gray-400 hover:bg-gray-50 font-medium transition-colors"
-                >
-                  Atrás
-                </button>
-                <button
-                  onClick={handleSubmit}
-                  disabled={isLoading || !formData.acceptTerms}
-                  className="flex-1 bg-gradient-to-r from-purple-600 to-purple-700 text-white py-3 px-4 rounded-xl hover:from-purple-700 hover:to-purple-800 disabled:opacity-50 disabled:cursor-not-allowed font-medium flex items-center justify-center space-x-2 transition-all duration-200 transform hover:scale-105 shadow-lg"
-                >
-                  {isLoading ? (
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  ) : (
-                    <>
-                      <span>Crear cuenta</span>
-                      <ArrowRight className="h-4 w-4" />
-                    </>
+                <div className="mb-3">
+                  <label className="form-label fw-semibold">
+                    Contraseña *
+                  </label>
+                  <div className="position-relative">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      className={`form-control form-control-lg pe-5 ${errors.password ? 'is-invalid' : ''}`}
+                      value={formData.password}
+                      onChange={(e) => handleInputChange('password', e.target.value)}
+                      placeholder="Mínimo 6 caracteres"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="btn btn-link position-absolute top-50 end-0 translate-middle-y text-muted"
+                      style={{border: 'none', background: 'none'}}
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+                  {errors.password && <div className="invalid-feedback d-block">{errors.password}</div>}
+                  {formData.password && formData.password.length < 6 && (
+                    <div className="form-text text-danger">La contraseña debe tener al menos 6 caracteres</div>
                   )}
+                </div>
+
+                <div className="mb-4">
+                  <label className="form-label fw-semibold">
+                    Confirmar contraseña *
+                  </label>
+                  <input
+                    type="password"
+                    className={`form-control form-control-lg ${errors.confirmPassword ? 'is-invalid' : ''}`}
+                    value={formData.confirmPassword}
+                    onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                    placeholder="Repite tu contraseña"
+                  />
+                  {errors.confirmPassword && <div className="invalid-feedback">{errors.confirmPassword}</div>}
+                  {formData.confirmPassword && formData.password !== formData.confirmPassword && (
+                    <div className="form-text text-danger">Las contraseñas no coinciden</div>
+                  )}
+                </div>
+
+                <button
+                  onClick={nextStep}
+                  className="btn btn-primary btn-lg w-100 py-3 fw-semibold d-flex align-items-center justify-content-center"
+                >
+                  Continuar
+                  <ArrowRight size={18} className="ms-2" />
                 </button>
               </div>
-            </div>
-          )}
+            )}
 
-          <p className="text-center text-sm text-gray-600">
-            ¿Ya tienes cuenta?{' '}
-            <button className="font-medium text-purple-600 hover:text-purple-500 transition-colors">
-              Inicia sesión
-            </button>
-          </p>
+            {step === 2 && (
+              <div className="animate-on-load opacity-0" style={{transform: 'translateY(20px)', animationDelay: '0.1s'}}>
+                <div className="mb-3">
+                  <label className="form-label fw-semibold d-flex align-items-center">
+                    <Building2 size={16} className="me-2" />
+                    Nombre de tu negocio
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control form-control-lg"
+                    value={formData.businessName}
+                    onChange={(e) => handleInputChange('businessName', e.target.value)}
+                    placeholder="Ej: Salón María, Dr. García, etc."
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label className="form-label fw-semibold d-flex align-items-center">
+                    <Phone size={16} className="me-2" />
+                    Teléfono
+                  </label>
+                  <input
+                    type="tel"
+                    className="form-control form-control-lg"
+                    value={formData.phone}
+                    onChange={(e) => handleInputChange('phone', e.target.value)}
+                    placeholder="+56 9 1234 5678"
+                  />
+                </div>
+
+                <div className="mb-4 p-4 rounded-3" style={{
+                  background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%)',
+                  border: '1px solid rgba(59, 130, 246, 0.2)'
+                }}>
+                  <h6 className="fw-bold text-primary mb-3">¿Qué incluye tu prueba gratuita?</h6>
+                  <div className="row g-2 small">
+                    <div className="col-12">
+                      <div className="d-flex align-items-center">
+                        <CheckCircle size={16} className="text-success me-2 flex-shrink-0" />
+                        14 días completamente gratis
+                      </div>
+                    </div>
+                    <div className="col-12">
+                      <div className="d-flex align-items-center">
+                        <CheckCircle size={16} className="text-success me-2 flex-shrink-0" />
+                        Todas las funciones incluidas
+                      </div>
+                    </div>
+                    <div className="col-12">
+                      <div className="d-flex align-items-center">
+                        <CheckCircle size={16} className="text-success me-2 flex-shrink-0" />
+                        Sin tarjeta de crédito requerida
+                      </div>
+                    </div>
+                    <div className="col-12">
+                      <div className="d-flex align-items-center">
+                        <CheckCircle size={16} className="text-success me-2 flex-shrink-0" />
+                        Soporte personalizado
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mb-4">
+                  <div className="form-check">
+                    <input
+                      className={`form-check-input ${errors.acceptTerms ? 'is-invalid' : ''}`}
+                      type="checkbox"
+                      id="acceptTerms"
+                      checked={formData.acceptTerms}
+                      onChange={(e) => handleInputChange('acceptTerms', e.target.checked)}
+                    />
+                    <label className="form-check-label small text-muted" htmlFor="acceptTerms">
+                      Acepto los{' '}
+                      <a href="#" className="text-primary text-decoration-none fw-medium">
+                        términos y condiciones
+                      </a>{' '}
+                      y la{' '}
+                      <a href="#" className="text-primary text-decoration-none fw-medium">
+                        política de privacidad
+                      </a>
+                    </label>
+                    {errors.acceptTerms && <div className="invalid-feedback d-block">{errors.acceptTerms}</div>}
+                  </div>
+                </div>
+
+                <div className="row g-2 mb-4">
+                  <div className="col">
+                    <button
+                      onClick={prevStep}
+                      className="btn btn-outline-secondary btn-lg w-100 py-3 fw-semibold"
+                    >
+                      Atrás
+                    </button>
+                  </div>
+                  <div className="col">
+                    <button
+                      onClick={handleSubmit}
+                      disabled={isLoading || !formData.acceptTerms}
+                      className="btn btn-primary btn-lg w-100 py-3 fw-semibold d-flex align-items-center justify-content-center"
+                    >
+                      {isLoading ? (
+                        <>
+                          <div className="spinner-border spinner-border-sm me-2" role="status">
+                            <span className="visually-hidden">Loading...</span>
+                          </div>
+                          Creando...
+                        </>
+                      ) : (
+                        <>
+                          Crear cuenta
+                          <ArrowRight size={18} className="ms-2" />
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Login Link */}
+            <div className="animate-on-load opacity-0 text-center" style={{transform: 'translateY(20px)', animationDelay: '0.3s'}}>
+              <p className="text-muted mb-0">
+                ¿Ya tienes cuenta?{' '}
+                <Link href="/login" className="text-primary text-decoration-none fw-semibold">
+                  Inicia sesión
+                </Link>
+              </p>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  );
+
+      <style jsx>{`
+        .animate-on-load {
+          transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        
+        .animate-on-load.animate-in {
+          opacity: 1 !important;
+          transform: translateY(0) !important;
+        }
+
+        .btn:hover:not(:disabled) {
+          transform: translateY(-2px);
+        }
+
+        .form-control:focus {
+          transform: translateY(-1px);
+          box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
+        }
+
+        @media (max-width: 991px) {
+          .min-vh-100 {
+            padding-top: 80px;
+            padding-bottom: 40px;
+          }
+        }
+      `}</style>
+    </>
+  )
 }
