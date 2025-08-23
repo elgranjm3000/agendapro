@@ -12,6 +12,7 @@ import {
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-white">
+      <h1 className='class="text-3xl font-bold underline text-blue-600 hover:text-blue-800 transition-colors"'>hola</h1>
       {/* Header */}
       <header className="border-b border-gray-100">
         <nav className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
