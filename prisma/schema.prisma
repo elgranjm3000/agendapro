@@ -1,0 +1,270 @@
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                     Int       @id @default(autoincrement())
+  email                  String    @unique @db.VarChar(255)
+  password               String    @db.VarChar(255)
+  name                   String    @db.VarChar(255)
+  phone                  String?   @db.VarChar(20)
+  businessName           String?   @map("business_name") @db.VarChar(255)
+  businessAddress        String?   @map("business_address") @db.Text
+  businessPhone          String?   @map("business_phone") @db.VarChar(20)
+  timezone               String    @default("America/Santiago") @db.VarChar(50)
+  subscriptionPlan       SubscriptionPlan @default(FREE) @map("subscription_plan")
+  subscriptionExpiresAt  DateTime? @map("subscription_expires_at")
+  emailVerified          Boolean   @default(false) @map("email_verified")
+  createdAt              DateTime  @default(now()) @map("created_at")
+  updatedAt              DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  clients                Client[]
+  services               Service[]
+  workSchedules          WorkSchedule[]
+  appointments           Appointment[]
+  payments               Payment[]
+  notifications          Notification[]
+  businessSettings       BusinessSetting[]
+  sessions               Session[]
+
+  @@map("users")
+}
+
+model Client {
+  id                   Int       @id @default(autoincrement())
+  userId               Int       @map("user_id")
+  name                 String    @db.VarChar(255)
+  email                String?   @db.VarChar(255)
+  phone                String?   @db.VarChar(20)
+  notes                String?   @db.Text
+  dateOfBirth          DateTime? @map("date_of_birth") @db.Date
+  gender               Gender?
+  address              String?   @db.Text
+  totalAppointments    Int       @default(0) @map("total_appointments")
+  lastAppointmentDate  DateTime? @map("last_appointment_date")
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  user                 User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  appointments         Appointment[]
+  payments             Payment[]
+
+  @@index([userId, phone], name: "idx_user_phone")
+  @@index([userId, email], name: "idx_user_email")
+  @@map("clients")
+}
+
+model Service {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @map("user_id")
+  name        String   @db.VarChar(255)
+  description String?  @db.Text
+  duration    Int      // en minutos
+  price       Decimal  @db.Decimal(10, 2)
+  color       String   @default("#3B82F6") @db.VarChar(7)
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  appointments Appointment[]
+
+  @@index([userId, isActive], name: "idx_user_active")
+  @@map("services")
+}
+
+model WorkSchedule {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  dayOfWeek Int      @map("day_of_week") @db.TinyInt // 0=domingo, 1=lunes, etc
+  startTime DateTime @map("start_time") @db.Time
+  endTime   DateTime @map("end_time") @db.Time
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, dayOfWeek], name: "unique_user_day")
+  @@map("work_schedules")
+}
+
+model Appointment {
+  id               Int               @id @default(autoincrement())
+  userId           Int               @map("user_id")
+  clientId         Int               @map("client_id")
+  serviceId        Int               @map("service_id")
+  appointmentDate  DateTime          @map("appointment_date") @db.Date
+  startTime        DateTime          @map("start_time") @db.Time
+  endTime          DateTime          @map("end_time") @db.Time
+  status           AppointmentStatus @default(SCHEDULED)
+  price            Decimal?          @db.Decimal(10, 2)
+  paymentStatus    PaymentStatus     @default(PENDING) @map("payment_status")
+  notes            String?           @db.Text
+  reminderSent     Boolean           @default(false) @map("reminder_sent")
+  confirmationSent Boolean           @default(false) @map("confirmation_sent")
+  createdAt        DateTime          @default(now()) @map("created_at")
+  updatedAt        DateTime          @updatedAt @map("updated_at")
+
+  // Relations
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  client        Client         @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  service       Service        @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  payments      Payment[]
+  notifications Notification[]
+
+  @@unique([userId, appointmentDate, startTime], name: "unique_appointment_slot")
+  @@index([userId, appointmentDate], name: "idx_user_date")
+  @@index([clientId, appointmentDate], name: "idx_client_date")
+  @@index([status], name: "idx_status")
+  @@index([appointmentDate, startTime], name: "idx_appointments_datetime")
+  @@map("appointments")
+}
+
+model Payment {
+  id                Int           @id @default(autoincrement())
+  appointmentId     Int           @map("appointment_id")
+  userId            Int           @map("user_id")
+  clientId          Int           @map("client_id")
+  amount            Decimal       @db.Decimal(10, 2)
+  paymentMethod     PaymentMethod @map("payment_method")
+  paymentProvider   String?       @map("payment_provider") @db.VarChar(50)
+  providerPaymentId String?       @map("provider_payment_id") @db.VarChar(255)
+  status            PaymentStatus @default(PENDING)
+  paidAt            DateTime?     @map("paid_at")
+  refundedAt        DateTime?     @map("refunded_at")
+  notes             String?       @db.Text
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  appointment Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  client      Client      @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt], name: "idx_user_date")
+  @@index([status], name: "idx_status")
+  @@map("payments")
+}
+
+model Notification {
+  id            Int                @id @default(autoincrement())
+  userId        Int                @map("user_id")
+  appointmentId Int?               @map("appointment_id")
+  type          NotificationType
+  channel       NotificationChannel
+  recipient     String             @db.VarChar(255)
+  subject       String?            @db.VarChar(255)
+  message       String             @db.Text
+  status        NotificationStatus @default(PENDING)
+  sentAt        DateTime?          @map("sent_at")
+  deliveredAt   DateTime?          @map("delivered_at")
+  errorMessage  String?            @map("error_message") @db.Text
+  createdAt     DateTime           @default(now()) @map("created_at")
+
+  // Relations
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  appointment Appointment? @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+
+  @@index([userId, status], name: "idx_user_status")
+  @@index([sentAt], name: "idx_sent_date")
+  @@map("notifications")
+}
+
+model BusinessSetting {
+  id           Int      @id @default(autoincrement())
+  userId       Int      @map("user_id")
+  settingKey   String   @map("setting_key") @db.VarChar(100)
+  settingValue String?  @map("setting_value") @db.Text
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, settingKey], name: "unique_user_setting")
+  @@map("business_settings")
+}
+
+model Session {
+  id        String   @id @db.VarChar(255)
+  userId    Int      @map("user_id")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], name: "idx_user_id")
+  @@index([expiresAt], name: "idx_expires")
+  @@map("sessions")
+}
+
+// Enums
+enum SubscriptionPlan {
+  FREE @map("free")
+  PRO @map("pro")
+  PREMIUM @map("premium")
+}
+
+enum Gender {
+  MALE @map("male")
+  FEMALE @map("female")
+  OTHER @map("other")
+}
+
+enum AppointmentStatus {
+  SCHEDULED @map("scheduled")
+  CONFIRMED @map("confirmed")
+  COMPLETED @map("completed")
+  CANCELLED @map("cancelled")
+  NO_SHOW @map("no_show")
+}
+
+enum PaymentStatus {
+  PENDING @map("pending")
+  PAID @map("paid")
+  REFUNDED @map("refunded")
+}
+
+enum PaymentMethod {
+  CASH @map("cash")
+  CARD @map("card")
+  TRANSFER @map("transfer")
+  ONLINE @map("online")
+}
+
+enum NotificationType {
+  REMINDER @map("reminder")
+  CONFIRMATION @map("confirmation")
+  CANCELLATION @map("cancellation")
+  PAYMENT @map("payment")
+}
+
+enum NotificationChannel {
+  WHATSAPP @map("whatsapp")
+  EMAIL @map("email")
+  SMS @map("sms")
+}
+
+enum NotificationStatus {
+  PENDING @map("pending")
+  SENT @map("sent")
+  DELIVERED @map("delivered")
+  FAILED @map("failed")
+}
+
+// .env example
+// DATABASE_URL="mysql://usuario:password@localhost:3306/agenda_pro"
+// NEXTAUTH_SECRET="tu-secret-key-aqui"
+// NEXTAUTH_URL="http://localhost:3000"
