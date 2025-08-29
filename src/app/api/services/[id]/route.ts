@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { withAuth } from '@/lib/middleware'
 import { serviceSchema } from '@/lib/validations'
-
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
 // GET - Obtener servicio específico
 export async function GET(
   request: NextRequest,

@@ -3,7 +3,8 @@ import { prisma } from '@/lib/db'
 import { withAuth } from '@/lib/middleware'
 import { appointmentSchema } from '@/lib/validations'
 import { addMinutesToTime, formatTime, isTimeSlotAvailable } from '@/lib/utils'
-
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
 // GET - Obtener cita específica
 export async function GET(
   request: NextRequest,

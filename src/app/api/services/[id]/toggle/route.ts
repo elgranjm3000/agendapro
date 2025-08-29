@@ -2,7 +2,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { withAuth } from '@/lib/middleware'
-
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
 // POST - Activar/Desactivar servicio
 export async function POST(
   request: NextRequest,

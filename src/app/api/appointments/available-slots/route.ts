@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { withAuth } from '@/lib/middleware'
 import { generateAvailableSlots, formatTime } from '@/lib/utils'
-
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
 // GET - Obtener horarios disponibles para una fecha específica
 export async function GET(request: NextRequest) {
   try {

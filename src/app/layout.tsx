@@ -5,21 +5,14 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import BootstrapClient from '@/components/BootstrapClient'
 
 const inter = Inter({ subsets: ['latin'] })
-
 export const metadata: Metadata = {
   title: {
     default: 'AgendaPro - Gestión Profesional de Citas',
     template: '%s | AgendaPro'
   },
-  description: 'La plataforma más completa para administrar citas, clientes y pagos en tu negocio de servicios. Optimiza tu tiempo y aumenta tus ingresos.',
+  description: 'La plataforma más completa para administrar citas, clientes y pagos en tu negocio de servicios.',
   keywords: ['agenda', 'citas', 'gestión', 'negocio', 'servicios', 'clientes', 'pagos'],
-  authors: [{ name: 'AgendaPro Team' }],
-  creator: 'AgendaPro',
-  publisher: 'AgendaPro',
-  robots: {
-    index: true,
-    follow: true,
-  },
+  metadataBase: new URL('https://agendapro.com'), // Esto arregla el warning de metadataBase
   openGraph: {
     type: 'website',
     locale: 'es_ES',
@@ -32,17 +25,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'AgendaPro - Gestión Profesional de Citas',
     description: 'La plataforma más completa para administrar citas, clientes y pagos en tu negocio de servicios.',
-    creator: '@agendapro',
   },
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-  },
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#1f2937' }
-  ]
 }
 
 

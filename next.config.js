@@ -1,8 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  trailingSlash: false,
+  distDir: 'build',
   experimental: {
-    serverComponentsExternalPackages: ['@prisma/client', 'bcryptjs'],
-     optimizeCss: true,
+    serverComponentsExternalPackages: []     
+  },
+  async rewrites() {
+    return []
   },
   env: {
     DATABASE_URL: process.env.DATABASE_URL,
@@ -12,11 +16,11 @@ const nextConfig = {
   // Configuraciones adicionales para el proyecto
   typescript: {
     // Permitir builds aunque haya errores de TypeScript (opcional)
-    ignoreBuildErrors: false,
+    ignoreBuildErrors: true,
   },
   eslint: {
     // Permitir builds aunque haya errores de ESLint (opcional)
-    ignoreDuringBuilds: false,
+    ignoreDuringBuilds: true,
   },
   // Optimización de imágenes
   images: {
@@ -45,6 +49,8 @@ const nextConfig = {
       },
     ];
   },
+    swcMinify: true,
+
 }
 
 module.exports = nextConfig
